@@ -9,4 +9,6 @@ struct Person {
   int sex; // 1 = garçon, 2 = fille
   bool married;
   Person* partner;
+  Person* father;
+  Person* mother;
 };
