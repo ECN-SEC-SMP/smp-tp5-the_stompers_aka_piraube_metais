@@ -6,7 +6,7 @@ struct Person {
   std::string name;
   std::string firstname;
   int year_of_birth;
-  int sex; // 1 = garçon, 2 = fille
+  int sex;
   bool married;
   Person* partner;
   Person* father;

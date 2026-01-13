@@ -1,15 +1,26 @@
 #include "utilitaires.h"
 
 Person* creerPersonne(std::string name,
-                      std::string firstname,
-                      int year_of_birth,
-                      int sex,
-                      bool married = false,
-                      Person* partner = nullptr,
-                      Person* father = nullptr,
-                      Person* mother = nullptr)
+					  std::string firstname,
+					  int year_of_birth,
+					  int sex,
+					  bool married,
+					  Person* partner,
+					  Person* father,
+					  Person* mother)
 {
-    return new Person(name, firstname, year_of_birth, sex, married, partner, father, mother);
+	Person* p = new Person;
+
+	p->name = name;
+	p->firstname = firstname;
+	p->year_of_birth = year_of_birth;
+	p->sex = sex;
+	p->married = married;
+	p->partner = partner;
+	p->father = father;
+	p->mother = mother;
+
+	return p;
 }
 
 void detruirePersonne(Person* p)
@@ -17,27 +28,38 @@ void detruirePersonne(Person* p)
     delete p;
 }
 
-void mariage( *Person p1, *Person p2){
-	p1->partner = p2;
-	p1->married = true;
-	p2->partner = p1;
-	p2->married = true;
+void mariage(Person *p1, Person *p2){
+	if (p1->partner != nullptr || p2->partner != nullptr) {
+		if (ancetre(p1, p2) == false || ancetre(p2, p1) == false || frereSoeur(p1, p2)){
+			return;
+		}
+	}
+	else {
+		p1->partner = p2;
+		p1->married = true;
+		p2->partner = p1;
+		p2->married = true;
+	}
 }
 
 void showPerson(Person *p){
-  std::cout << p->sex == 2 ? "Madame " : "Monsieur " << p->firstname << " " << p->name << " ";
+	if(p == nullptr)
+		return;
+  std::cout << (p->sex == 2 ? "Madame " : "Monsieur ") << p->firstname << " " << p->name;
   if (p->married && p->partner != nullptr) {
-      std::cout << p->sex == 2 ? "épouse " : "époux " << "de " << p->partner->sex == 2 ? "Mme. " : "M. " << p->partner->name << endl;
-  }
+      std::cout << (p->sex == 2 ? " epouse " : " epoux ") << "de " << (p->partner->sex == 2 ? "Mme. " : "M. ") << p->partner->name << " " << std::endl;
+  }else{
+		std::cout << " " << std::endl;
+	}
   if (p->father != nullptr) {
-      std::cout << "De père " << p->father->firstname << " " << p->father->name << endl;
+      std::cout << "De pere " << p->father->firstname << " " << p->father->name << std::endl;
   } else {
-      std::cout << "De père INCONNU" << endl;
+      std::cout << "De pere INCONNU" << std::endl;
   }
-  If (p->mother != nullptr) {
-      std::cout << "De mère " << p->mother->firstname << " " << p->mother->name << endl;
+  if (p->mother != nullptr) {
+      std::cout << "De mere " << p->mother->firstname << " " << p->mother->name << std::endl;
   } else {
-      std::cout << "De mère INCONNUE" << endl;
+      std::cout << "De mere INCONNUE" << std::endl;
   }
 }
 
@@ -62,7 +84,91 @@ bool memePerson(Person *p1, Person *p2){
 }
 
 bool ancetre(Person *a, Person *b){
+  if (a == nullptr || b == nullptr)
+    return false;
+
+  if (a->father == b || a->mother == b)
+    return true;
+  // } else {
+  //   if(ancetre(a->father, b) || ancetre(a->mother, b)){
+  //     return true;
+  //   }
+  // }
+  return (ancetre(a->father, b) || ancetre(a->mother, b));
 }
 
-int generations(Person *p){
+int generations(Person *p) {
+    if (p == nullptr)
+        return 0;
+// 	int father = 1 + generations(p->father);
+// 	int mother = 1 + generations(p->mother);
+// 	return std::max(father, mother);
+    return 1 + std::max(generations(p->father), generations(p->mother));
+}
+
+int treeSize(Person *p) {
+    if (p == nullptr)
+        return 0;
+
+    Person* father = p->father;
+    Person* mother = p->mother;
+
+    // cas : père est un ancêtre de la mère
+    if (ancetre(mother, father)) {
+        // le père sera déjà compté dans l'arbre de la mère
+        return 1 + treeSize(mother);
+    }
+
+    // cas : mère est un ancêtre du père
+    if (ancetre(father, mother)) {
+        // la mère sera déjà comptée dans l'arbre du père
+        return 1 + treeSize(father);
+    }
+
+    // cas : les parents sont frère et sœur
+    if (father != nullptr && mother != nullptr && frereSoeur(father, mother)) {
+        // grands-parents identiques des deux côtés → on les compte une seule fois
+        // soit p (1) + père (1) + mère (1) + arbre des grands-parents
+        return 1 + 1 + 1 + treeSize(father->father) + treeSize(father->mother);
+    }
+
+    // cas normal : pas de consanguinité
+    return 1 + treeSize(father) + treeSize(mother);
+}
+
+void showTree(Person *p){
+	if(p == nullptr)
+		return;
+
+	showPerson(p);
+
+	Person* father = p->father;
+	Person* mother = p->mother;
+
+	// cas : père est un ancêtre de la mère
+	if (ancetre(mother, father)) {
+			// le père sera déjà compté dans l'arbre de la mère
+			showTree(mother);
+			return;
+	}
+
+	// cas : mère est un ancêtre du père
+	if (ancetre(father, mother)) {
+			// la mère sera déjà comptée dans l'arbre du père
+			showTree(father);
+			return;
+	}
+
+	// cas : les parents sont frère et sœur
+	if (father != nullptr && mother != nullptr && frereSoeur(father, mother)) {
+			// grands-parents identiques des deux côtés → on les compte une seule fois
+			// soit p (1) + père (1) + mère (1) + arbre des grands-parents
+			showTree(father->father);
+			showTree(father->mother);
+			return;
+	}
+
+	showTree(father);
+	showTree(mother);
+	// return;
 }
