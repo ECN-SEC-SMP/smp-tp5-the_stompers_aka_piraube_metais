@@ -1,13 +1,17 @@
 #include "utilitaires.h"
 
-Person* creerPersonne(std::string name,
-					  std::string firstname,
-					  int year_of_birth,
-					  int sex,
-					  bool married,
-					  Person* partner,
-					  Person* father,
-					  Person* mother)
+std::unordered_set<int> usedIds;
+
+Person* creerPersonne(
+						const std::string name,
+					  const std::string firstname,
+					  const int year_of_birth,
+					  const int sex,
+					  const bool married,
+					  const Person* partner,
+					  const Person* father,
+					  const Person* mother,
+						const int id)
 {
 	Person* p = new Person;
 
@@ -20,12 +24,17 @@ Person* creerPersonne(std::string name,
 	p->father = father;
 	p->mother = mother;
 
-	return p;
-}
+	if(id != -1){
+		p->id = id;
+		usedIds.insert(id);
+	} else {
+		do{
+			p->id = rand();
+		}while(usedIds.count(p->id));
+		usedIds.insert(p->id);
+	}
 
-void detruirePersonne(Person* p)
-{
-    delete p;
+	return p;
 }
 
 void mariage(Person *p1, Person *p2){
@@ -127,7 +136,7 @@ int treeSize(Person *p) {
 
     // cas : les parents sont frère et sœur
     if (father != nullptr && mother != nullptr && frereSoeur(father, mother)) {
-        // grands-parents identiques des deux côtés → on les compte une seule fois
+        // grands-parents identiques des deux côtés => on les compte une seule fois
         // soit p (1) + père (1) + mère (1) + arbre des grands-parents
         return 1 + 1 + 1 + treeSize(father->father) + treeSize(father->mother);
     }
@@ -136,7 +145,7 @@ int treeSize(Person *p) {
     return 1 + treeSize(father) + treeSize(mother);
 }
 
-void showTree(Person *p){
+void showTree(Person *p){ // pareil que treeSize() mais avec showPerson()
 	if(p == nullptr)
 		return;
 
@@ -147,22 +156,18 @@ void showTree(Person *p){
 
 	// cas : père est un ancêtre de la mère
 	if (ancetre(mother, father)) {
-			// le père sera déjà compté dans l'arbre de la mère
 			showTree(mother);
 			return;
 	}
 
 	// cas : mère est un ancêtre du père
 	if (ancetre(father, mother)) {
-			// la mère sera déjà comptée dans l'arbre du père
 			showTree(father);
 			return;
 	}
 
 	// cas : les parents sont frère et sœur
 	if (father != nullptr && mother != nullptr && frereSoeur(father, mother)) {
-			// grands-parents identiques des deux côtés → on les compte une seule fois
-			// soit p (1) + père (1) + mère (1) + arbre des grands-parents
 			showTree(father->father);
 			showTree(father->mother);
 			return;
@@ -170,5 +175,46 @@ void showTree(Person *p){
 
 	showTree(father);
 	showTree(mother);
-	// return;
+}
+
+int save(Person *p) {
+    std::ofstream fichierPersonne("sauvegarde.txt");
+	if (!fichierPersonne) {
+		std::cerr << "Can't open the file" << std::endl;
+		return 0;
+	}
+	file << p.id << " "
+	 << p.name << " "
+	 << p.firstname << " "
+	 << p.year_of_birth << " "
+	 << p.sex << " "
+	 << p.married << " "
+	 << (p.partner ? p.partner->id : -1) << " "
+	 << (p.father  ? p.father->id  : -1) << " "
+	 << (p.mother  ? p.mother->id  : -1)
+	 << "\n";
+	return 1;
+}
+
+vector<Person> loadPerson() {
+	std::vector<Person> personnes;
+	std::ifstream fichierPersonne("sauvegegarde.txt");
+	// tableau matrcielle pour stocker les personnes
+	// vector de vector chaque ligne est une personne et sur la chaque ligne on a les infos à chaque espace
+	if (!fichierPersonne) {
+		std::cerr << "Can't open the file" << std::endl;
+		return personnes;
+	}
+	std::string line;
+	while (std::getline(fichierPersonne, line)) {
+		std::istringstream iss(line);
+		int id, year_of_birth, sex, married, partner_id, father_id, mother_id;
+		std::string name, firstname;
+		if (!(iss >> id >> name >> firstname >> year_of_birth >> sex >> married >> partner_id >> father_id >> mother_id)) {
+			break; // error
+		}
+		creerPersonne(name, firstname, year_of_birth, sex, married, partner_id, father_id, mother_id, id);
+	}
+	return personnes;
+
 }

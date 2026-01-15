@@ -3,6 +3,10 @@
 #include "type_def.h"
 #include <iostream>     // std::cout
 #include <algorithm>    // std::max
+#include <cstdlib>      // rand()
+#include <unordered_set>
+#include <fstream>
+#include <vector>
 
 Person* creerPersonne(std::string name,
                       std::string firstname,
@@ -11,7 +15,8 @@ Person* creerPersonne(std::string name,
                       bool married = false,
                       Person* partner = nullptr,
                       Person* father = nullptr,
-                      Person* mother = nullptr);
+                      Person* mother = nullptr,
+                      int id = -1);
 void detruirePersonne(Person* p);
 void mariage(Person *p1, Person *p2);
 void showPerson(Person *p);

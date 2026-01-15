@@ -3,6 +3,7 @@
 #include <string>
 
 struct Person {
+  int id;
   std::string name;
   std::string firstname;
   int year_of_birth;
@@ -11,4 +12,11 @@ struct Person {
   Person* partner;
   Person* father;
   Person* mother;
+};
+
+struct PersonTemp {
+  Person person;
+  int partner_id;
+  int father_id;
+  int mother_id;
 };
