@@ -187,6 +187,7 @@ int save(Person *p) {
 		std::cerr << "Can't open the file" << std::endl;
 		return 0;
 	}
+	// Ecriture des attributs dans le fichier texte
 	fichierPersonne << p->id << " "
 	 << p->name << " "
 	 << p->firstname << " "
@@ -212,15 +213,26 @@ Person* findPersonById(std::vector<Person>& persons, int id) {
 
 // Fonction pour charger les liens entre les personnes
 std::vector<Person> setLink(std::vector<Person> personnes, std::unordered_map<int, std::array<int, 3>> links) {
-	//for (const auto& relation : links) {
-		// on récupère l'ID d'une personne
-		//int key = relation.first;
-		// on récupère les id du père, mère et conjoint
-		//const std::array<int, 3>& values = relation.second;
-		// on récupère l'objet de la personne en fonction de son id
-		//*Person currentPerson = findPersonById(personnes, key);
-		//currentPerson = currentPerson->father;
-	//}
+	for (const auto& relation : links) {
+		// On récupère l'ID d'une personne
+		int key = relation.first;
+
+		// On récupère les id du conjoint, père et mère
+		const std::array<int, 3>& values = relation.second;
+
+		// On récupère l'objet de la personne en fonction de son id
+		Person *currentPerson = findPersonById(personnes, key);
+
+		// On récupère la personne conjoint, père et mère
+		Person *conjoinPerson = findPersonById(personnes, links[key][0]);
+		Person *fatherPerson = findPersonById(personnes, links[key][1]);
+		Person *motherPerson = findPersonById(personnes, links[key][2]);
+
+		// On attribue les adresses sur l'attribut
+		currentPerson->partner = conjoinPerson;
+		currentPerson->father = fatherPerson;
+		currentPerson->mother = motherPerson;
+	}
 	return personnes;
 }
 
@@ -254,6 +266,8 @@ std::vector<Person> loadPerson() {
 		persons_relations[id] = {partner_id, father_id, mother_id};
 		personnes.push_back(*personActu);
 	}
-	setLink();
+
+	// Attribution des liens conjoint, père et mère
+	personnes = setLink(personnes, persons_relations);
 	return personnes;
 }

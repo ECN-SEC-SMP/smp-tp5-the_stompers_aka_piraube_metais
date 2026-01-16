@@ -13,10 +13,3 @@ struct Person {
   Person* father;
   Person* mother;
 };
-
-struct PersonTemp {
-  Person person;
-  int partner_id;
-  int father_id;
-  int mother_id;
-};
