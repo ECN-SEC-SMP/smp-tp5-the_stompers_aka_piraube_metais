@@ -13,6 +13,13 @@ int main(int argc, char** argv) {
     std::cout << generations(p6) << std::endl;
     std::cout << treeSize(p6) << std::endl;
     showTree(p6);
+	//save(p1);
+	//save(p2);
+	//save(p3);
+	//save(p4);
+	//save(p5);
+	//save(p6);
+	std::vector<Person> personnes = loadPerson();
 
     return 0;
 }

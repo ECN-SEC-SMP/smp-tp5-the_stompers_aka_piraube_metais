@@ -8,9 +8,9 @@ Person* creerPersonne(
 					  const int year_of_birth,
 					  const int sex,
 					  const bool married,
-					  const Person* partner,
-					  const Person* father,
-					  const Person* mother,
+					  Person* partner,
+					  Person* father,
+					  Person* mother,
 						const int id)
 {
 	Person* p = new Person;
@@ -177,44 +177,83 @@ void showTree(Person *p){ // pareil que treeSize() mais avec showPerson()
 	showTree(mother);
 }
 
+// Fonction pour sauvegarder une personne dans un fichier texte
 int save(Person *p) {
-    std::ofstream fichierPersonne("sauvegarde.txt");
+	// Création ou modification du fichier sauvegarde.txt
+	std::ofstream fichierPersonne("sauvegarde.txt", std::ios::app);
+
+	// Si il y a un problème dans la création ou l'ouverture du fichier
 	if (!fichierPersonne) {
 		std::cerr << "Can't open the file" << std::endl;
 		return 0;
 	}
-	file << p.id << " "
-	 << p.name << " "
-	 << p.firstname << " "
-	 << p.year_of_birth << " "
-	 << p.sex << " "
-	 << p.married << " "
-	 << (p.partner ? p.partner->id : -1) << " "
-	 << (p.father  ? p.father->id  : -1) << " "
-	 << (p.mother  ? p.mother->id  : -1)
+	fichierPersonne << p->id << " "
+	 << p->name << " "
+	 << p->firstname << " "
+	 << p->year_of_birth << " "
+	 << p->sex << " "
+	 << p->married << " "
+	 << (p->partner ? p->partner->id : -1) << " "
+	 << (p->father  ? p->father->id  : -1) << " "
+	 << (p->mother  ? p->mother->id  : -1)
 	 << "\n";
 	return 1;
 }
 
-vector<Person> loadPerson() {
+// Fonction qui renvoie l'adresse d'une personne en fonction de son id
+Person* findPersonById(std::vector<Person>& persons, int id) {
+	for (auto& p : persons) {
+		if (p.id == id) {
+			return &p;
+		}
+	}
+	return nullptr;
+}
+
+// Fonction pour charger les liens entre les personnes
+std::vector<Person> setLink(std::vector<Person> personnes, std::unordered_map<int, std::array<int, 3>> links) {
+	//for (const auto& relation : links) {
+		// on récupère l'ID d'une personne
+		//int key = relation.first;
+		// on récupère les id du père, mère et conjoint
+		//const std::array<int, 3>& values = relation.second;
+		// on récupère l'objet de la personne en fonction de son id
+		//*Person currentPerson = findPersonById(personnes, key);
+		//currentPerson = currentPerson->father;
+	//}
+	return personnes;
+}
+
+std::vector<Person> loadPerson() {
+	// Vecteur de personnes
 	std::vector<Person> personnes;
-	std::ifstream fichierPersonne("sauvegegarde.txt");
-	// tableau matrcielle pour stocker les personnes
-	// vector de vector chaque ligne est une personne et sur la chaque ligne on a les infos à chaque espace
+	// Hashmap des relations
+	std::unordered_map<int, std::array<int, 3>> persons_relations;
+	std::ifstream fichierPersonne("sauvegarde.txt");
 	if (!fichierPersonne) {
 		std::cerr << "Can't open the file" << std::endl;
 		return personnes;
 	}
+
+	// Ligne du fichier en lecture
 	std::string line;
 	while (std::getline(fichierPersonne, line)) {
-		std::istringstream iss(line);
-		int id, year_of_birth, sex, married, partner_id, father_id, mother_id;
+		int id, year, sex, married;
 		std::string name, firstname;
-		if (!(iss >> id >> name >> firstname >> year_of_birth >> sex >> married >> partner_id >> father_id >> mother_id)) {
-			break; // error
-		}
-		creerPersonne(name, firstname, year_of_birth, sex, married, partner_id, father_id, mother_id, id);
-	}
-	return personnes;
+		int partner_id, father_id, mother_id;
+		// Pour ségmenter les différents attributs
+		std::istringstream iss(line);
 
+		// Récupération des attributs de la ligne aux variables
+		iss >> id >> name >> firstname >> year >> sex >> married >> partner_id >> father_id >> mother_id;
+
+		// On créé la personne et on la met dans le vecteur avec nullptr pour les liens (partenaire, père, mère)
+		Person *personActu = creerPersonne(name, firstname, year, sex, married, nullptr, nullptr, nullptr, id);
+
+		// On stocke en fonction de l'id de la personnes, l'id des relations
+		persons_relations[id] = {partner_id, father_id, mother_id};
+		personnes.push_back(*personActu);
+	}
+	setLink();
+	return personnes;
 }

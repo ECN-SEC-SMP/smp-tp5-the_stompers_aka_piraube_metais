@@ -7,6 +7,9 @@
 #include <unordered_set>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
+#include <array>
+#include <sstream>
 
 Person* creerPersonne(std::string name,
                       std::string firstname,
@@ -26,3 +29,8 @@ bool ancetre(Person *ancetre, Person *psonne);
 int generations(Person *p);
 int treeSize(Person *p);
 void showTree(Person *p);
+int save(Person *p);
+Person* findPersonById(std::vector<Person>& persons, int id);
+std::vector<Person> setLink(std::vector<Person> personnes, std::unordered_map<int, std::array<int, 3>> links);
+std::vector<Person> loadPerson();
+
