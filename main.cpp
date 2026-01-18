@@ -1,6 +1,7 @@
 #include "utilitaires.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
     srand(time(0));
     Person *p1 = creerPersonne("Metai", "Thoma", 2005, 1, 0);
     Person *p2 = creerPersonne("Balais", "Jardin", 2000, 2, 0);
@@ -13,13 +14,13 @@ int main(int argc, char** argv) {
     std::cout << generations(p6) << std::endl;
     std::cout << treeSize(p6) << std::endl;
     showTree(p6);
-	//save(p1);
-	//save(p2);
-	//save(p3);
-	//save(p4);
-	//save(p5);
-	//save(p6);
-	std::vector<Person> personnes = loadPerson();
+    save(p1);
+    save(p2);
+    save(p3);
+    save(p4);
+    save(p5);
+    save(p6);
+    std::vector<Person> personnes = loadPerson();
 
     return 0;
 }
